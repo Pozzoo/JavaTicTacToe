@@ -5,122 +5,123 @@ public class Main {
     public static Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        Board board = new Board();
+        int comput = 3;
+
         int[][] tab = new int[3][3];
-        boolean player = true;
-        int isWon;
+        board.setTab(tab);
 
-        step(tab);
+        boolean mode = menu();
+        board.setMode(mode);
 
-        do {
-            turn(tab, player);
-            player = !player;
-            isWon = won(tab);
-        } while (isWon == 0);
+        board.step();
 
-        if (isWon == 1) {
+        if (mode) {
+            umJogador(board, comput);
+        } else
+            doisJogadores(board);
+
+        if (board.getIsWon() == 1) {
             System.out.println("X ganhou!!");
-        } else if (isWon == 2) {
+        } else if (board.getIsWon() == 2) {
             System.out.println("O ganhou!!");
         } else {
             System.out.println("Deu véia!!");
         }
-
     }
 
-    public static void turn(int[][] tab, boolean player) throws IOException, InterruptedException {
-        int linha, coluna;
+    public static boolean menu() throws IOException, InterruptedException {
+        int option;
+
+        do {
+            System.out.println("""
+                    [1] Um jogador
+                    [2] Dois jogadores
+                    """);
+            System.out.println("Digite o modo de jogo desejado:");
+            option = Integer.parseInt(input.nextLine());
+        } while (option != 1 && option != 2);
+
+        clearS();
+
+        return option == 1;
+    }
+
+    public static void doisJogadores(Board board) throws IOException, InterruptedException {
+        boolean onePlayer = false;
+        int comput = 3;
+        do {
+            turn(board, comput);
+            board.setPlayer(!board.getPlayer());
+            board.setIsWon(board.won());
+        } while (board.getIsWon() == 0);
+    }
+
+    public static void umJogador(Board board, int comput) throws IOException, InterruptedException {
+        if (comput == 3) {
+            comput = 2;
+        } else if (comput == 2) {
+            comput = 1;
+        } else if (comput == 1) {
+            comput = 2;
+        }
+        do {
+            turn(board, comput);
+            board.setPlayer(!board.getPlayer());
+
+            board.setIsWon(board.won());
+
+        } while (board.getIsWon() == 0);
+    }
+
+    public static void turn(Board board, int comput) throws IOException, InterruptedException {
         boolean jogInv;
 
         do {
             jogInv = false;
-            if (player) {
+            if (board.getPlayer() && comput != 1) {
                 System.out.println("Vez do X");
-            } else {
+            } else if (comput != 2) {
                 System.out.println("Vez do O");
             }
 
-            System.out.println("Digite a linha");
-            linha = (Integer.parseInt(input.nextLine()) - 1);
 
-            System.out.println("Digite a coluna");
-            coluna = (Integer.parseInt(input.nextLine()) - 1);
+            jogInv = getPlay(board, jogInv);
 
-            if (linha > 2 || linha < 0 || coluna > 2 || coluna < 0) {
-                jogInv = true;
-            }
-
-            if (!jogInv && tab[linha][coluna] == 0) {
-                if (player) {
-                    tab[linha][coluna] = 1;
-                } else {
-                    tab[linha][coluna] = 5;
-                }
-            } else {
-                System.out.println("Jogada invalida!");
-                System.out.println("----------------");
-                jogInv = true;
-            }
         } while (jogInv);
-        step(tab);
+        board.step();
     }
 
-    public static int won(int[][] tab) {
-        int col, lin, dig = 0, dig2 = 0, tud = 0;
+    public static boolean getPlay(Board board, boolean jogInv) {
+        int linha, coluna;
 
-        for (int i = 0; i < 3; i++) {
-            col = 0;
-            lin = 0;
+        System.out.println("Digite a linha");
+        linha = (Integer.parseInt(input.nextLine()) - 1);
 
-            for (int j = 0; j < 3; j++) {
-                col += tab[i][j];
-                lin += tab[j][i];
-                tud += tab[i][j];
+        System.out.println("Digite a coluna");
+        coluna = (Integer.parseInt(input.nextLine()) - 1);
 
-                if (i == j) {
-                    dig += tab[i][j];
-                }
-                if (i + j == 2) {
-                    dig2 += tab[i][j];
-                }
-            }
-
-            if (col == 3 || lin == 3 || dig == 3|| dig2 == 3) {
-                return 1;
-            } else if (col == 15 || lin == 15 || dig == 15 || dig2 == 15) {
-                return 2;
-            } else if (tud == 25) {
-                return 3;
-            }
+        if (linha > 2 || linha < 0 || coluna > 2 || coluna < 0) {
+            jogInv = true;
         }
-        return 0;
+
+        int[][] tab = board.getTab();
+
+        if (!jogInv && tab[linha][coluna] == 0) {
+            board.write(linha, coluna);
+        } else {
+            System.out.println("Jogada invalida!");
+            System.out.println("----------------");
+            jogInv = true;
+        }
+        return jogInv;
     }
 
-    public static void step(int[][] tab) throws IOException, InterruptedException {
-        String[][] tabS = new String[3][3];
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (tab[i][j] == 1) {
-                    tabS[i][j] = "X";
-                } else if (tab[i][j] == 5) {
-                    tabS[i][j] = "O";
-                } else {
-                    tabS[i][j] = " ";
-                }
-            }
-        }
-
-        String tabF1 = String.format(" %s | %s | %s ", tabS[0][0], tabS[0][1], tabS[0][2]);
-        String tabF2 = String.format("---+---+---" + "\n" + " %s | %s | %s ", tabS[1][0], tabS[1][1], tabS[1][2]);
-        String tabF3 = String.format("---+---+---" + "\n" + " %s | %s | %s ", tabS[2][0], tabS[2][1], tabS[2][2]);
-
+    public static void clearS() throws IOException, InterruptedException {
         if (System.getProperty("os.name").contains("Windows"))
             new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         else
             Runtime.getRuntime().exec("clear");
-
-        System.out.println("\n" + tabF1);
-        System.out.println(tabF2);
-        System.out.println(tabF3);
     }
 }
