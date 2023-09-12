@@ -11,40 +11,57 @@ public class Main {
         int[][] tab = new int[3][3];
         board.setTab(tab);
 
-        boolean mode = menu();
-        board.setMode(mode);
+        int mode;
+        do {
+            mode = menu();
 
-        board.step();
+            int opcao;
+            do {
+                if (mode == 3)
+                    break;
 
-        if (mode) {
-            umJogador(board);
-        } else
-            doisJogadores(board);
+                board.setMode(mode == 1);
 
-        if (board.getIsWon() == 1) {
-            System.out.println("X ganhou!!");
-        } else if (board.getIsWon() == 2) {
-            System.out.println("O ganhou!!");
-        } else {
-            System.out.println("Deu véia!!");
-        }
+                board.step();
+
+                if (mode == 1) {
+                    umJogador(board);
+                } else
+                    doisJogadores(board);
+
+                if (board.getIsWon() == 1) {
+                    System.out.println("X ganhou!!");
+                } else if (board.getIsWon() == 2) {
+                    System.out.println("O ganhou!!");
+                } else {
+                    System.out.println("Deu véia!!");
+                }
+
+                System.out.println("""
+                        [1] Jogar novamente
+                        [2] Menu
+                        """);
+                opcao = Integer.parseInt(input.nextLine());
+            } while (opcao == 1);
+        } while (mode != 3);
     }
 
-    public static boolean menu() throws IOException, InterruptedException {
+    public static int menu() throws IOException, InterruptedException {
         int option;
 
         do {
             System.out.println("""
                     [1] Um jogador
                     [2] Dois jogadores
+                    [3] Sair
                     """);
             System.out.println("Digite o modo de jogo desejado:");
             option = Integer.parseInt(input.nextLine());
-        } while (option != 1 && option != 2);
+        } while (option != 1 && option != 2 && option != 3);
 
         clearS();
 
-        return option == 1;
+        return option;
     }
 
     public static void doisJogadores(Board board) throws IOException, InterruptedException {
@@ -65,10 +82,23 @@ public class Main {
             board.setComput(2);
         }
         do {
-            turn(board);
+            if (board.getComput() == 2)
+                turn(board);
+            else
+                board.computPlay();
+
             board.setPlayer(!board.getPlayer());
             board.setRound(board.getRound() + 1);
-            board.computPlay();
+            board.setIsWon(board.won());
+
+            if (board.getIsWon() != 0)
+                break;
+
+            if (board.getComput() == 2)
+                board.computPlay();
+            else
+                turn(board);
+
             board.setPlayer(!board.getPlayer());
             board.setIsWon(board.won());
 
@@ -85,7 +115,6 @@ public class Main {
             } else if (board.getComput() != 2) {
                 System.out.println("Vez do O");
             }
-
 
             jogInv = getPlay(board, jogInv);
 

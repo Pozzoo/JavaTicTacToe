@@ -59,6 +59,14 @@ public class Board {
         this.mode = mode;
     }
 
+    public void clearBoard() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                tab[i][j] = 0;
+            }
+        }
+    }
+
 
     public int won() {
         int col, lin, dig = 0, dig2 = 0, tud = 0;
@@ -81,10 +89,13 @@ public class Board {
             }
 
             if (col == 3 || lin == 3 || dig == 3|| dig2 == 3) {
+                clearBoard();
                 return 1;
             } else if (col == 15 || lin == 15 || dig == 15 || dig2 == 15) {
+                clearBoard();
                 return 2;
             } else if (tud == 25) {
+                clearBoard();
                 return 3;
             }
         }
@@ -113,39 +124,25 @@ public class Board {
                 }
             }
 
-            switch (comput) {
-                case 1 -> {
-                    if (col == 10) {
-                        playCol(i);
-                        played = true;
-                    } else if (lin == 10) {
-                        playLin(i);
-                        played = true;
-                    } else if (dig == 10) {
-                        playDig();
-                        played = true;
-                    } else if (dig2 == 10) {
-                        playDig2();
-                        played = true;
-                    }
-                }
-                case 2 -> {
-                    if (col == 2) {
-                        playCol(i);
-                        played = true;
-                    } else if (lin == 2) {
-                        playLin(i);
-                        played = true;
-                    } else if (dig == 2) {
-                        playDig();
-                        played = true;
-                    } else if (dig2 == 2) {
-                        playDig2();
-                        played = true;
-                    }
-                }
+            if (col == 10 || col == 2) {
+                playCol(i);
+                played = true;
+                break;
+            } else if (lin == 10 || lin == 2) {
+                playLin(i);
+                played = true;
+                break;
+            } else if (dig == 10 || dig == 2) {
+                playDig();
+                played = true;
+                break;
+            } else if (dig2 == 10 || dig2 == 2) {
+                playDig2();
+                played = true;
+                break;
             }
         }
+
 
         if (round == 1) {
             int option = random.nextInt(0, 4);
@@ -166,7 +163,7 @@ public class Board {
             write(lin, col);
         } else if (!played) {
             boolean playable = false;
-            for (int i = 0; i < 18; i++) {
+            for (int i = 0; i < 25; i++) {
 
                 lin = random.nextInt(0, 2);
                 col = random.nextInt(0, 2);
