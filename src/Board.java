@@ -1,10 +1,31 @@
 import java.io.IOException;
+import java.util.Random;
+
+import static java.lang.Math.random;
 
 public class Board {
     private int isWon = 0;
+    private int comput;
     private int[][] tab;
+    private int round = 1;
     private boolean player = true;
     private boolean mode;
+
+    public int getRound() {
+        return round;
+    }
+
+    public void setRound(int round) {
+        this.round = round;
+    }
+
+    public int getComput() {
+        return comput;
+    }
+
+    public void setComput(int comput) {
+        this.comput = comput;
+    }
 
     public int getIsWon() {
         return isWon;
@@ -70,16 +91,19 @@ public class Board {
         return 0;
     }
 
-    public void computPlay() {
-        int col, lin, dig = 0, dig2 = 0;
+    public void computPlay() throws IOException, InterruptedException {
+        Random random = new Random();
+        int col = 0, lin = 0, dig = 0, dig2 = 0;
+        int j;
+        boolean played = false;
 
         for (int i = 0; i < 3; i++) {
             col = 0;
             lin = 0;
 
-            for (int j = 0; j < 3; j++) {
-                col += tab[i][j];
-                lin += tab[j][i];
+            for (j = 0; j < 3; j++) {
+                col += tab[j][i];
+                lin += tab[i][j];
 
                 if (i == j) {
                     dig += tab[i][j];
@@ -88,19 +112,113 @@ public class Board {
                     dig2 += tab[i][j];
                 }
             }
-            if (col == 2 || col == 10) {
 
+            switch (comput) {
+                case 1 -> {
+                    if (col == 10) {
+                        playCol(i);
+                        played = true;
+                    } else if (lin == 10) {
+                        playLin(i);
+                        played = true;
+                    } else if (dig == 10) {
+                        playDig();
+                        played = true;
+                    } else if (dig2 == 10) {
+                        playDig2();
+                        played = true;
+                    }
+                }
+                case 2 -> {
+                    if (col == 2) {
+                        playCol(i);
+                        played = true;
+                    } else if (lin == 2) {
+                        playLin(i);
+                        played = true;
+                    } else if (dig == 2) {
+                        playDig();
+                        played = true;
+                    } else if (dig2 == 2) {
+                        playDig2();
+                        played = true;
+                    }
+                }
+            }
+        }
+
+        if (round == 1) {
+            int option = random.nextInt(0, 4);
+
+            switch (option) {
+                case 0 -> write(0, 0);
+                case 1 -> write(0, 2);
+                case 2 -> write(1, 1);
+                case 3 -> write(2, 0);
+                case 4 -> write(2, 2);
+            }
+        } else if (round == 2 && !played) {
+            do {
+                lin = random.nextInt(0, 2);
+                col = random.nextInt(0, 2);
+            } while (tab[lin][col] != 0);
+
+            write(lin, col);
+        } else if (!played) {
+            boolean playable = false;
+            for (int i = 0; i < 18; i++) {
+
+                lin = random.nextInt(0, 2);
+                col = random.nextInt(0, 2);
+
+                if (tab[lin][col] == 0) {
+                    playable = true;
+                    break;
+                }
+            }
+            if (playable){
+                write(lin, col);
+            }
+
+        }
+    }
+    private void playLin(int i) throws IOException, InterruptedException {
+        for (int j = 0; j < 3; j++) {
+            if (tab[i][j] == 0) {
+                write(i, j);
+            }
+        }
+    }
+    private void playCol(int i) throws IOException, InterruptedException {
+        for (int j = 0; j < 3; j++) {
+            if (tab[j][i]== 0) {
+                write(j, i);
+            }
+        }
+    }
+    private void playDig() throws IOException, InterruptedException {
+        for (int i = 0; i < 3; i++) {
+            if (tab[i][i] == 0) {
+                write(i, i);
+            }
+        }
+    }
+    private void playDig2() throws IOException, InterruptedException {
+        for (int i = 0; i < 3; i++) {
+            if (tab[i][2 - i] == 0) {
+                write(i, 2 - i );
             }
         }
     }
 
-    public void write(int linha, int coluna) {
+    public void write(int linha, int coluna) throws IOException, InterruptedException {
 
         if (player) {
             tab[linha][coluna] = 1;
         } else {
             tab[linha][coluna] = 5;
         }
+        step();
     }
 
     public void step() throws IOException, InterruptedException {
@@ -130,5 +248,13 @@ public class Board {
         System.out.println("\n" + tabF1);
         System.out.println(tabF2);
         System.out.println(tabF3);
+    }
+    private void debugTable() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print(tab[i][j] + " ");
+            }
+            System.out.print("\n");
+        }
     }
 }

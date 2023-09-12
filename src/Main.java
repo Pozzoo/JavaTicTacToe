@@ -6,7 +6,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Board board = new Board();
-        int comput = 3;
+        board.setComput(3);
 
         int[][] tab = new int[3][3];
         board.setTab(tab);
@@ -17,7 +17,7 @@ public class Main {
         board.step();
 
         if (mode) {
-            umJogador(board, comput);
+            umJogador(board);
         } else
             doisJogadores(board);
 
@@ -48,40 +48,41 @@ public class Main {
     }
 
     public static void doisJogadores(Board board) throws IOException, InterruptedException {
-        boolean onePlayer = false;
-        int comput = 3;
+        board.setComput(3);
         do {
-            turn(board, comput);
+            turn(board);
             board.setPlayer(!board.getPlayer());
             board.setIsWon(board.won());
         } while (board.getIsWon() == 0);
     }
 
-    public static void umJogador(Board board, int comput) throws IOException, InterruptedException {
-        if (comput == 3) {
-            comput = 2;
-        } else if (comput == 2) {
-            comput = 1;
-        } else if (comput == 1) {
-            comput = 2;
+    public static void umJogador(Board board) throws IOException, InterruptedException {
+        if (board.getComput() == 3) {
+            board.setComput(2);
+        } else if (board.getComput() == 2) {
+            board.setComput(1);
+        } else if (board.getComput() == 1) {
+            board.setComput(2);
         }
         do {
-            turn(board, comput);
+            turn(board);
             board.setPlayer(!board.getPlayer());
-
+            board.setRound(board.getRound() + 1);
+            board.computPlay();
+            board.setPlayer(!board.getPlayer());
             board.setIsWon(board.won());
 
         } while (board.getIsWon() == 0);
     }
 
-    public static void turn(Board board, int comput) throws IOException, InterruptedException {
+    public static void turn(Board board) throws IOException, InterruptedException {
         boolean jogInv;
 
         do {
             jogInv = false;
-            if (board.getPlayer() && comput != 1) {
+            if (board.getPlayer() && board.getComput() != 1) {
                 System.out.println("Vez do X");
-            } else if (comput != 2) {
+            } else if (board.getComput() != 2) {
                 System.out.println("Vez do O");
             }
 
@@ -89,10 +90,9 @@ public class Main {
             jogInv = getPlay(board, jogInv);
 
         } while (jogInv);
-        board.step();
     }
 
-    public static boolean getPlay(Board board, boolean jogInv) {
+    public static boolean getPlay(Board board, boolean jogInv) throws IOException, InterruptedException {
         int linha, coluna;
 
         System.out.println("Digite a linha");
